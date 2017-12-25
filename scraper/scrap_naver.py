@@ -277,6 +277,7 @@ def get_naver_shopping_review(nvMid):
             if len(atc_areas) > 0 :
                 for atc_area in atc_areas:        
                     review = parse_naver_shopping_review(atc_area)
+                    review['nvMid'] = nvMid
                     reviews_list.append(review)
             else:
                 return reviews_list
@@ -293,7 +294,6 @@ def parse_naver_shopping_review(atc_area):
     review_date = re_date.findall(review_date)[0]
     review_path = atc_area.find("span",{'class':'path'}).text
     return {
-        'nvMid': nvMid,
         'atc' : review_atc,
         'grade': review_grade,
         'date': review_date,
