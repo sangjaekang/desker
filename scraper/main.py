@@ -85,6 +85,19 @@ if __name__ == "__main__":
     parser.add_argument('--category', default='50000004')
     args = parser.parse_args()
 
+    fh = logging.FileHandler('crawl_app.log')
+    fh.setLevel(logging.DEBUG)
+
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.INFO)
+
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
+    ch.setFormatter(formatter)
+
+    logger.addHandler(fh)
+    logger.addHandler(ch)
+
     logger = logging.getLogger("crawl_app")
     logger.setLevel(logging.INFO)
 
