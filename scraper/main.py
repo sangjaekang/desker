@@ -95,11 +95,11 @@ if __name__ == "__main__":
     fh.setFormatter(formatter)
     ch.setFormatter(formatter)
 
+    logger = logging.getLogger("crawl_app")
+    logger.setLevel(logging.INFO)
     logger.addHandler(fh)
     logger.addHandler(ch)
 
-    logger = logging.getLogger("crawl_app")
-    logger.setLevel(logging.INFO)
 
     if args.type == 'category':
         run_category(args.host,args.category)

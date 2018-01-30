@@ -182,7 +182,7 @@ class Itemparser(Process):
             self.task_saver({row['nv_mid']:0})
 
 class Reviewparser(Process):
-    logger = logging.getLogger("crawl_app.Itemparser")
+    logger = logging.getLogger("crawl_app.Reviewparser")
 
     def __init__(self, queue, saver):
         super(Reviewparser,self).__init__()

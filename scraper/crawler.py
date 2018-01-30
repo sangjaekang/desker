@@ -304,7 +304,7 @@ class Reviewcrawler(Process):
         for nv_mid, count in self.research_list.items():
             with requests.Session() as sess:
                 self.params['nv_mid'] = nv_mid
-                self.params['pagingIndex'] = 1
+                self.params['page'] = ""
 
                 res = sess.get(self.sess_url,params={"nv_mid":nv_mid})
                 res_text = res.text
@@ -313,13 +313,13 @@ class Reviewcrawler(Process):
                     continue
                 res_text = self._append_info(res_text,nv_mid)
                 self.queue.put((res_text, res_url))
-                total_paging_count = self._count_pages(res_text,res_url) - int(count)
+                total_paging_count = self._count_pages(res_text,res_url)
                 paging_count = total_paging_count - int(count)
                 self.logger.info("start to search review. NvMid[{}] ... nums of paging : {}"\
                                  .format(nv_mid,paging_count))
                 start = time.time()
                 for idx in range(2,paging_count+1):
-                    self.params['pagingIndex'] = idx
+                    self.params['page'] = idx
 
                     res_text, res_url = self._requests_text(sess)
                     if res_text is None:
