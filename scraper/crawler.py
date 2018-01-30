@@ -313,7 +313,7 @@ class Reviewcrawler(Process):
                     continue
                 res_text = self._append_info(res_text,nv_mid)
                 self.queue.put((res_text, res_url))
-                total_paging_count = self._count_pages(res_text,res_url)
+                total_paging_count, total_count = self._count_pages(res_text,res_url)
                 paging_count = total_paging_count - int(count)
                 self.logger.info("start to search review. NvMid[{}] ... nums of paging : {}"\
                                  .format(nv_mid,paging_count))
@@ -331,7 +331,7 @@ class Reviewcrawler(Process):
                     if (end-start)-self.delay > 0:
                         time.sleep(end-start-self.delay)
                     start = time.time()
-            self.updater({nv_mid:total_paging_count})
+            self.updater({nv_mid:total_count})
         self.logger.info("end to run")
         self.queue.put((EXIT,EXIT))
 
@@ -371,7 +371,7 @@ class Reviewcrawler(Process):
         except ValueError as e:
             total_count = 0
         paging_count = math.ceil(total_count / 20)
-        return paging_count
+        return paging_count, total_count
 
     def _append_info(self, res_text,nv_mid):
         res_text = '<div class="nv_mid">{}</div>'.format(nv_mid) + res_text
