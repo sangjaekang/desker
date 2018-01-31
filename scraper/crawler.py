@@ -319,8 +319,8 @@ class Reviewcrawler(Process):
                                  .format(nv_mid,paging_count))
                 start = time.time()
 
-                self.params['nvMid'] = nv_mid
                 del self.params['nv_mid']
+                self.params['nvMid'] = nv_mid
 
                 for idx in range(2,paging_count+1):
                     self.params['page'] = idx

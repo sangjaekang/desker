@@ -110,7 +110,7 @@ class Itemparser(Process):
         bsObj = BeautifulSoup(res_text,"html.parser")
         brand_id = bsObj.find('div',{'class':'brand_id'}).text
         brand_name = bsObj.find('div',{'class':'brand_name'}).text
-        row = {"brand_id":brand_id,"brand_name":brand_name}
+        row = {"brand_id":brand_id,"브랜드":brand_name}
         for li in bsObj.find_all("li",{"class":"_itemSection"}):
             try:
                 row["nv_mid"] = li.attrs['data-nv-mid']
@@ -144,39 +144,44 @@ class Itemparser(Process):
                 row["price_compare_exist"] = False
 
             try:
-                row["item_title"] = info.find('a',{'class':'tit'}).attrs['title']
+                row["제품명"] = info.find('a',{'class':'tit'}).attrs['title']
             except AttributeError as e:
-                row["item_title"] = ""
+                row["제품명"] = ""
                 self.logger.warn("item title is missing... url : {}".format(res_url))
 
             try:
-                price_expr = info.find('span',{"class":'price'}).em.text
-                row["min_price"] = re.sub("\D","",price_expr)
-                if int(row['min_price']) > 1e8:
+                price_expr = info.find('span',{"class":'price'}).em.text.strip()
+                row["가격"] = re.sub("\D","",price_expr)
+                if int(row['가격']) > 1e8:
                     raise AttributeError
             except AttributeError as e:
-                row["min_price"] = ""
+                row["가격"] = "-1"
                 self.logger.warn("item price is missing... url : {}".format(res_url))
 
             try:
-                cat_expr = info.find('span',{'class':'depth'}).text
-                row["item_cats"] =  [expr.strip() for expr in re.sub("\n *","",cat_expr).split(">")]
+                cat_expr = info.find('span',{'class':'depth'}).text.strip()
+                idx = 1
+                for expr in re.sub("\n *","",cat_expr).split(">"):
+                    row['{}번째카테고리'.format(idx)] = expr.strip()
+                    idx += 1
             except AttributeError as e:
-                row["item_cats"] = []
+                for idx in range(1,5):
+                    row['{}번째카테고리'.format(idx)] = ""
                 self.logger.warn("category is missing... url : {}".format(res_url))
 
             try:
-                row["item_spec"] = info.find('span',{'class':'detail'}).text
+                row["제품정보"] = info.find('span',{'class':'detail'}).text.strip()
             except AttributeError as e:
-                row["item_spec"] = ""
+                row["제품정보"] = ""
                 self.logger.warn("item spec is missing... url : {}".format(res_url))
 
             try:
-                date_expr =info.find('span',{'class':'date'}).text
-                row["reg_date"] = re.search("\d+.\d+.",date_expr).group(0)
+                date_expr =info.find('span',{'class':'date'}).text.strip()
+                row["등록일"] = re.search("\d+.\d+.",date_expr).group(0)
             except AttributeError as e:
-                row["reg_date"] = datetime.strftime(datetime.now(),"%Y.%m.")
+                row["등록일"] = datetime.strftime(datetime.now(),"%Y.%m.")
                 self.logger.warn("reg date is missing... url : {}".format(res_url))
+
             row_serial = json.dumps(row)
             self.saver(row_serial)
             self.task_saver({row['nv_mid']:0})
@@ -217,37 +222,37 @@ class Reviewparser(Process):
         for atc_area in bsObj.find_all("div",{'class':'atc_area'}):
             try:
                 title_expr = atc_area.p.text
-                row["review_title"] = re.sub("[\n\t]","",title_expr).strip()
+                row["리뷰제목"] = re.sub("[\n\t]","",title_expr).strip()
             except:
                 self.logger.warning("info is missing... url : {}".format(res_url))
-                row['review_title'] = ""
+                row['리뷰제목'] = ""
 
             try:
                 atc_expr = atc_area.find("div",{'class':'atc'}).text
-                row["review_atc"] = re.sub("[\n\t]","",atc_expr).strip()
+                row["리뷰본문"] = re.sub("[\n\t]","",atc_expr).strip()
             except:
                 self.logger.error('article is missing... url : {}'.format(res_url))
                 continue
 
             try:
-                row["review_grade"] = atc_area.find("span",{'class':'curr_avg'}).text
+                row["별점"] = atc_area.find("span",{'class':'curr_avg'}).text
             except:
                 self.logger.warning('grade is missing... url : {}'.format(res_url))
-                row['review_grade'] = "0"
+                row['별점'] = "0"
 
 
             try:
                 date_expr = atc_area.find("span",{'class':'date'}).text
-                row["review_date"] = re.sub("[^\d.]","",date_expr)
+                row["리뷰날짜"] = re.sub("[^\d.]","",date_expr)
             except:
                 self.logger.warning('date is missing... url : {}'.format(res_url))
-                row['review_date'] = datetime.strftime(datetime.now(),format="%Y.%m.%d.")
+                row['리뷰날짜'] = datetime.strftime(datetime.now(),format="%Y.%m.%d.")
 
             try:
-                row["review_path"] = atc_area.find("span",{'class':'path'}).text
+                row["리뷰사이트"] = atc_area.find("span",{'class':'path'}).text
             except:
                 self.logger.warning('path is missing... url : {}'.format(res_url))
-                row['review_path'] = ""
+                row['리뷰사이트'] = ""
 
             row_serial = json.dumps(row)
             self.saver(row_serial)
